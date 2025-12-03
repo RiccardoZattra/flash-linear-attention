@@ -10,9 +10,9 @@ import torch.nn as nn
 from einops import rearrange
 from torch.nn import functional as F
 
-from fla.layers.utils import get_unpad_data, index_first_axis, pad_input
-from fla.modules import FusedRMSNormGated, RMSNorm, ShortConvolution
-from fla.ops.delta_rule import chunk_delta_rule, fused_recurrent_delta_rule
+from fla.layers.utils import get_unpad_data, index_first_axis, pad_input #these should be helper functions
+from fla.modules import FusedRMSNormGated, RMSNorm, ShortConvolution #these are modules implemented in this folder
+from fla.ops.delta_rule import chunk_delta_rule, fused_recurrent_delta_rule #these are the low level implementation in triton
 
 if TYPE_CHECKING:
     from transformers.processing_utils import Unpack
