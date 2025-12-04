@@ -140,7 +140,9 @@ class DeltaNet(nn.Module):
 
         self.use_beta = use_beta
         #if we use beta then we obtain beta as a linear transformation, in particular it seems that
-        #here we use one beta per heads
+        #here we use one beta per heads (this seems correct becuase every SSM implement an attention layer and 
+        #in multi head attention we need to process lower dimensional versions of query keys and values with different
+        #with different heads (i.e. a different state space model) which has its own beta)
         if self.use_beta:
             self.b_proj = nn.Linear(hidden_size, self.num_heads, bias=False)
         if use_short_conv:
