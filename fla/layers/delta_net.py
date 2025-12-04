@@ -19,11 +19,15 @@ if TYPE_CHECKING:
 
     from fla.models.utils import Cache
 
-
+# F.elu(x, 1., False) (tensor,alpha,in_place=False) alpha is a parameter of the ELU function
+# in_place = false means create a new tensor to store the result
+# to(x) = create a tensor of the same type of 'x' and move it on the same device
 def elu_p1(x):
-    return (F.elu(x, 1., False) + 1.).to(x)
+    return (F.elu(x, 1., False) + 1.).to(x) 
 
-
+# It should take a tensor and sum along the last dimenion (if it is a matrix it should sum the rows)
+# then with keepdim=true the alst dimension is [1] which allow for broadcasting. This is a sum normalization
+# where you divide every element of the vector by the sum of all its elements
 def sum_norm(x):
     return (x / x.sum(-1, keepdim=True)).to(x)
 
