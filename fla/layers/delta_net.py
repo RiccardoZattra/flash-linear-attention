@@ -190,10 +190,10 @@ class DeltaNet(nn.Module):
         #torch.Tensor | None used to specify that input argument can be a torch Tensor or None 
         # "= None" means if not passed set it equal to None
         attention_mask: torch.Tensor | None = None,
-        past_key_values: Cache | None = None,
-        use_cache: bool | None = False,
-        output_attentions: bool | None = False,
-        **kwargs: Unpack[dict],
+        past_key_values: Cache | None = None, #I'm not sure but this should be the variable that keeps track of the last state S_t
+        use_cache: bool | None = False, #               NOT UNDERSTOOD!!!
+        output_attentions: bool | None = False, #(here but it seems unused)
+        **kwargs: Unpack[dict], #other additional parameters
     ) -> tuple[torch.Tensor, torch.Tensor | None, Cache | None]:
         #Given that in language processing we can have sequences of different lenghts, when creating a batch we are not obtaining
         #a tensor of dimension [B,L] because L is not the same for every sequence. However, we expect a tensor with dimension
@@ -208,8 +208,11 @@ class DeltaNet(nn.Module):
             )
 
         batch_size, q_len, _ = hidden_states.shape #this should be the dimension of the input tensor X = [B,L,D]
+
+        # "fused_recurrent_mode" is typically optimized for autoregressive inference/generation when processing
+        # short sequences step by step, so the software switch to fused_recurrent if q_len <=64
         # change to inference mode.
-        mode = 'fused_recurrent' if q_len <= 64 else self.mode
+        mode = 'fused_recurrent' if q_len <= 64 else self.mode 
 
         last_state = None
         if past_key_values is not None and len(past_key_values) > self.layer_idx:
