@@ -38,38 +38,43 @@ class DeltaNet(nn.Module):
     DeltaNet was originally proposed in [Linear Transformers Are Secretly Fast Weight Programmers](https://arxiv.org/abs/2102.11174). # noqa
 
     Args:
+        (fused should stand for fused kernels, namely the ones where we combine more than one operations all together to save time. In fact
+        a linear transformation followed by an affine transformation followed by a non linearity if executed as three differents steps
+        are three different kernels that are calling the GPU three times, this is not efficiet. A fused kernel means to create a custom 
+        fucntion that performs all the three operations at once, optimizing call to the GPU ecc. This should be the meaning but it must 
+        be understood based on the triton implementation)
         mode (str, Optional):
             Which DeltaNet kernel to use.
             Currently available: `chunk`, `fused_recurrent`, and `fused_chunk`.
             Default: `chunk`.
-        hidden_size (int, Optional):
+        hidden_size (int, Optional): (X = input dimension)
             The hidden size of the input. Default: 1024.
-        expand_k (float, Optional):
+        expand_k (float, Optional): (expansion factor of the key)
             The expansion ratio for the key dim. Default: 1.0.
-        expand_v (float, Optional):
+        expand_v (float, Optional): (expansion factor of the value)
             The expansion ratio for the value dim. Default: 1.0.
         num_heads (int, Optional):
             The number of heads. Default: 4.
-        use_beta (bool, Optional):
+        use_beta (bool, Optional): (this is the beta of the linear reccurrence)
             Whether to use beta. Default: `True`.
-        use_gate (bool, Optional):
+        use_gate (bool, Optional):                          NOT UNDERSTOOD!!!
             Whether to use output gate. Default: `False`.
-        use_short_conv (bool, Optional):
+        use_short_conv (bool, Optional): (I think this means using a learned kernel much smaller w.r.t the input sequence length)
             Whether to use short convolutions. Default: `True`.
-        conv_size (int, Optional):
+        conv_size (int, Optional): (define the support of the kernel in case of using short_conv)
             The kernel size of the short convolution, only used when `use_short_conv` is `True`. Default: 4.
-        conv_bias (bool, Optional):
+        conv_bias (bool, Optional): (activate or deactivate bias in the short convolution)
             Whether to use bias in the short convolution, only used when `use_short_conv` is `True`. Default: `False`.
-        allow_neg_eigval (bool, Optional):
+        allow_neg_eigval (bool, Optional):                  NOT UNDERSTOOD!!!
             Allow negative eigenvalues. Default: `False`. If set to `True`, the beta will be multiplied by 2.
             See reference: [Unlocking State-Tracking in Linear RNNs Through Negative Eigenvalues](https://arxiv.org/abs/2411.12537)
-        layer_idx (int, Optional):
+        layer_idx (int, Optional):                          NOT UNDERSTOOD!!!
             The index of the layer. Default: None.
-        norm_eps (float, Optional):
+        norm_eps (float, Optional): (this is clear)
             The epsilon value for the layernorm/rmsnorm layer. Default: 1e-5.
-        qk_activation (str, Optional):
+        qk_activation (str, Optional): (this is clear)
             The activation function for the query and key. Default: `silu`.
-        qk_norm (str, Optional):
+        qk_norm (str, Optional): (this is clear)
             The normalization method for the query and key. Default: `l2`.
     """
 
