@@ -145,9 +145,13 @@ class DeltaNet(nn.Module):
         #with different heads (i.e. a different state space model) which has its own beta)
         if self.use_beta:
             self.b_proj = nn.Linear(hidden_size, self.num_heads, bias=False)
+
+        #If we use short convoution (meaning above)
+        #this is convolution type that they implemented to create somthing very efficient in triton, maybe this should be understood,
+        #anyway logically speaking these are the three convolutions reported in Figure 2 pag. 6 of the article.
         if use_short_conv:
             self.conv_size = conv_size
-            self.q_conv1d = ShortConvolution(
+            self.q_conv1d = ShortConvolution( 
                 hidden_size=self.key_dim,
                 kernel_size=conv_size,
                 bias=conv_bias,
@@ -170,23 +174,32 @@ class DeltaNet(nn.Module):
                 "ShortConvolution is crucial to the performance. "
                 "Do not turn it off, i.e., setting `use_short_conv=False` unless you know what you are doing.",
             )
-        if use_gate:
+        #This I think is what we need after having applied the DeltaRule as depicted in figure 2 pag. 6
+        if use_gate:#           NOT UNDERSTOOD!!!
             self.g_proj = nn.Linear(hidden_size, self.value_dim, bias=False)
             self.o_norm = FusedRMSNormGated(self.head_v_dim, eps=norm_eps)
         else:
+            #RMSnorm as depicted in figure 2 pag. 6 
             self.o_norm = RMSNorm(self.head_v_dim, eps=norm_eps, dtype=torch.float32)
-
+        #linear layer as in figure 2 pag. 6
         self.o_proj = nn.Linear(self.value_dim, hidden_size, bias=False)
 
     def forward(
         self,
         hidden_states: torch.Tensor,
+        #torch.Tensor | None used to specify that input argument can be a torch Tensor or None 
+        # "= None" means if not passed set it equal to None
         attention_mask: torch.Tensor | None = None,
         past_key_values: Cache | None = None,
         use_cache: bool | None = False,
         output_attentions: bool | None = False,
         **kwargs: Unpack[dict],
     ) -> tuple[torch.Tensor, torch.Tensor | None, Cache | None]:
+        #Given that in language processing we can have sequences of different lenghts, when creating a batch we are not obtaining
+        #a tensor of dimension [B,L] because L is not the same for every sequence. However, we expect a tensor with dimension
+        #[B,L] so to obtain it we pad with zeros the sequences that are shorter than the maximum one. The problem is that we need
+        #to keep into account of this padding otherwise the model thinks that all zeros are symbols of the sequence but this is
+        #not the case. To neglect the effect of this symbol we need to provide the appropriate mask
         if attention_mask is not None:
             assert len(attention_mask.shape) == 2, (
                 "Expected attention_mask as a 0-1 matrix with shape [batch_size, seq_len] "
@@ -194,7 +207,7 @@ class DeltaNet(nn.Module):
                 "Arbitrary attention masks of shape [batch_size, seq_len, seq_len] are not allowed."
             )
 
-        batch_size, q_len, _ = hidden_states.shape
+        batch_size, q_len, _ = hidden_states.shape #this should be the dimension of the input tensor X = [B,L,D]
         # change to inference mode.
         mode = 'fused_recurrent' if q_len <= 64 else self.mode
 
