@@ -1,0 +1,39 @@
+In this file I'll describe the projedct structure of the flash linear attention repository. Based on my understanding things are organized in the following way:
+
+Folders:
+1) benchmarks: In this folder there are softwares to understand how fast the various software implementation of activatons,conv ecc. are,
+	a) in subfolder modules: there are software that can test execution time of activoations,conv, cross_entropy ecc.
+	b) in subfolder ops: same stuff as before for different things like "delta_rule"
+	c) benchmark_generation.py I think this is a benchmark file to test throughput generation
+	d) benchmark_training_throughput.py I think this is to test the speed of the training script 
+
+2) evals: In this folder there are two scripts:
+	a) harness.py I think is a script that has the objective to use trained model to make inference, but it seems to me still work in progress
+	b) ppl.py I think this is a script to evaluate the perplexity of a trained model (perplexity is a metric used in language setting) 
+
+3) examples: Contains just a training.md file with the description of what you should do to train a model from scratch, continue pretraining ecc.
+
+4) FLA: this is where the real code is, this main folder is divided into subfolders like:
+	layers: here there is python + pytorch code to implement particular layers like DeltaNet,GatedDeltaNet ecc.
+	models: here youo have all the code implementation of models, so for example the encoder block created with delta net
+	modules: here there is the software implementation for some activations, fused kernels ecc.
+	ops: in this folder there should be the triton implementation of different layers like DeltaNet according to the math 
+		presented in the paper
+	utils.py: some useful functions in general (usual meaning of utils.py)
+5) Legacy/training: this is a folder that is no longer updated as it is written in the README.md file but it cointains the useful things for training models
+	configs: jason file to obtain where training configurations are
+	flame: here there is data.py that should contain software to obtain the data from dataset provided by Huggin Face then we have logging.py
+		a file that specify how and where to save information during training, and parser.py that is a sw to manage line arguments
+
+	preprocess.py: software that preprocess a dataset, for example applying tokenization
+	run.py: Should be the training procedure
+	train.sh: this is a script shell containing instructions for the shell
+6) Scripts: There are three scripts that can help (at the moment it is not clear to me why they help)
+7) Tests: this is a folder that contains test programs to test the developed software in the FLA folder to check for errors.
+	models: test software for the various models
+	moduels: the same but for modules
+	ops: the same but for triton implementation
+8) utils: contains some utils function
+9) other common files in a github folder
+	
+ 	
