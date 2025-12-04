@@ -1,0 +1,21 @@
+                 ┌─────────────────────┐
+                 │   Hugging Face Hub  │
+                 │  (modelli & dataset)│
+                 └─────────┬───────────┘
+                           │
+           ┌───────────────┼────────────────┐
+           │               │                │
+           ▼               ▼                ▼
+   ┌─────────────┐  ┌──────────────┐  ┌─────────────┐
+   │ Transformers│  │   Datasets   │  │  Tokenizers │
+   │  (Modelli   │  │  (Dataset    │  │  (Tokenizza│
+   │  pre-trained│  │  preprocessing│ │  zione veloce│
+   │  e training)│  │  e streaming) │ │  e compat.) │
+   └─────┬───────┘  └─────┬────────┘  └─────┬───────┘
+         │                │                │
+         │                │                │
+         ▼                ▼                ▼
+ ┌─────────────────────────────────────────────────┐
+ │                 Accelerate                     │
+ │  (Gestione GPU/TPU, mixed precision, distrib.)│
+ └─────────────────────────────────────────────────┘
