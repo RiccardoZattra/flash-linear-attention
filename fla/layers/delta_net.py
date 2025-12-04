@@ -96,10 +96,11 @@ class DeltaNet(nn.Module):
         qk_activation: str = 'silu',
         qk_norm: str = 'l2',
         norm_eps: float = 1e-5,
-        **kwargs,
+        **kwargs, # this is a dictionary of additional parameters accepted
     ) -> DeltaNet:
         super().__init__()
 
+        #--------------------------------saving arguements in class variables----------------------------------------
         self.mode = mode
         self.qk_activation = qk_activation
         self.qk_norm = qk_norm
@@ -121,21 +122,25 @@ class DeltaNet(nn.Module):
 
         self.key_dim = int(hidden_size * expand_k)
         self.value_dim = int(hidden_size * expand_v)
-        self.head_k_dim = self.key_dim // num_heads
+        self.head_k_dim = self.key_dim // num_heads # // means integer division
         self.head_v_dim = self.value_dim // num_heads
         self.layer_idx = layer_idx
 
         if mode == 'fused_chunk':
             raise NotImplementedError("fused_chunk_delta_rule is now deprecated. Please use `chunk_delta_rule` instead.")
         assert mode in ['chunk', 'fused_recurrent'], f"Not supported mode `{mode}`."
-        assert self.key_dim % num_heads == 0, f"key dim must be divisible by num_heads of {num_heads}"
+        assert self.key_dim % num_heads == 0, f"key dim must be divisible by num_heads of {num_heads}" #assert condition, if false execute what is after the comma
         assert self.value_dim % num_heads == 0, f"value dim must be divisible by num_heads of {num_heads}"
 
-        self.q_proj = nn.Linear(hidden_size, self.key_dim, bias=False)
+        #defining the three linear layers that takes the input and prodce the queries, keys and values
+        #Queries and keys have the same dimesion (otherwise QK^{T} not well defined)
+        self.q_proj = nn.Linear(hidden_size, self.key_dim, bias=False) 
         self.k_proj = nn.Linear(hidden_size, self.key_dim, bias=False)
         self.v_proj = nn.Linear(hidden_size, self.value_dim, bias=False)
 
         self.use_beta = use_beta
+        #if we use beta then we obtain beta as a linear transformation, in particular it seems that
+        #here we use one beta per heads
         if self.use_beta:
             self.b_proj = nn.Linear(hidden_size, self.num_heads, bias=False)
         if use_short_conv:
